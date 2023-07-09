@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Become a Seller</title>
+  <!-- Include any necessary CSS -->
+</head>
+<body>
+  <h1>Become a Seller</h1>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="official-name">Official Name:</label>
+      <input type="text" name="official_name" id="official-name" class="form-control" required>
+    </div>
+    <div class="form-group">
+      <label for="second-name">Second Name:</label>
+      <input type="text" name="second_name" id="second-name" class="form-control" required>
+    </div>
+    <div class="form-group">
+      <label for="documents">Upload Official Documents:</label>
+      <input type="file" name="documents" id="documents" class="form-control-file" required>
+    </div>
+    <div class="form-group">
+      <label for="description">Why do you want to sell in our marketplace?</label>
+      <textarea name="description" id="description" class="form-control" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Application</button>
+  </form>
+</body>
+</html>

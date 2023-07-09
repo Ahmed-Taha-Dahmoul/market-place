@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product Detail</title>
+  <style>
+    /* Custom CSS styling */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: auto;
+      border-radius: 5px;
+    }
+
+    h1 {
+      margin-top: 20px;
+      font-size: 24px;
+    }
+
+    .description {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: left;
+    }
+
+    p {
+      margin-bottom: 10px;
+    }
+
+    .buy-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="product-image">
+      {% for picture in pictures %}
+        {% if picture.product.id == product.id %}
+          <img src="{{ picture.image.url }}" alt="Product Image">
+        {% endif %}
+      {% endfor %}
+    </div>
+    <h1>{{ product.product_name }}</h1>
+    <div class="description">
+      <p>{{ product.product_description }}</p>
+    </div>
+    <p>Price: ${{ product.product_price }}</p>
+    <form method="post" action="{% url 'seller:buy_product' product.id %}">
+      {% csrf_token %}
+      <button type="submit" class="buy-button">Buy with Coinbase</button>
+    </form>
+  </div>
+</body>
+</html>

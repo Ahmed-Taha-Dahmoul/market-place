@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Sign Up</title>
+	<link rel="stylesheet" type="text/css" href="/static/css/style_signup.css">
+</head>
+<body>
+	<div class="container">
+		<h1>Sign Up</h1>
+        {% if error_message %}
+        <p class="error">{{ error_message }}</p>
+    {% endif %}
+		<form action="/signup/" method="POST" id="signupForm">
+            {% csrf_token %}
+			<label for="username"><b>Username</b></label>
+			<input type="text" placeholder="Enter Username" name="username" required>
+		  
+			<label for="email"><b>Email</b></label>
+			<input type="email" placeholder="Enter Email" name="email" id="emailInput" required>
+			<span id="emailError" class="error"></span>
+		  
+			<label for="mobile">Mobile Number:</label>
+			<input type="tel" id="mobile" name="mobile" placeholder="+216" required>
+		  
+			<label for="password"><b>Password</b></label>
+			<input type="password" placeholder="Enter Password" name="password" id="passwordInput" required>
+		  
+			<label for="confirm_password"><b>Confirm Password</b></label>
+			<input type="password" placeholder="Confirm Password" name="confirm_password" id="confirmPasswordInput" required>
+			<span id="passwordError" class="error"></span>
+		  
+			<button type="submit">Sign Up</button>
+			<p>Already have an account? <a href="/login">Login here</a></p>
+		</form>
+		<script src="/static/js/myscript_signup.js"></script>
+	</div>
+</body>
+</html>

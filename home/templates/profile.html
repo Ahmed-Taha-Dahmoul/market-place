@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/static/css/style_profile.css">
+    
+</head>
+<body>
+    <h1>User Profile</h1>
+
+    <div class="profile-info">
+        <p>Username: <span id="username">{{ user.username }}</span></p>
+        <p>Email: <span id="email">{{ user.email }}</span></p>
+        <p>Mobile: <span id="mobile">{{ user.profile.mobile }}</span></p>
+    </div>
+    {% if error_message %}
+    <p class="error">{{ error_message }}</p>
+{% endif %}
+    <button id="update-info-btn">Update Information</button>
+    <button id="change-password-btn">Change Password</button>
+
+    <div id="update-info-form" style="display: none;">
+        <h2>Update Information</h2>
+        
+        <form id="update-info" action="" method="POST">
+            {% csrf_token %}
+            
+            <label for="new-username">New Username:</label>
+            <input type="text" id="new-username" name="username" required>
+            
+            <label for="new-email">New Email:</label>
+            <input type="email" id="new-email" name="email" required>
+            
+            <label for="new-mobile">New Mobile:</label>
+            <input type="text" id="new-mobile" name="mobile" required>
+            
+            <button type="submit"  name="update_info">Save</button>
+            <button type="button" id="cancel-update-info">Cancel</button>
+        </form>
+    </div>
+
+    <div id="change-password-form" style="display: none;">
+        <h2>Change Password</h2>
+        
+        <form id="change-password" action="" method="POST">
+            {% csrf_token %}
+            
+            <label for="old-password">Old Password:</label>
+            <input type="password" id="old-password" name="old_password" required>
+            
+            <label for="new-password">New Password:</label>
+            <input type="password" id="new-password" name="password" required>
+            
+            <button type="submit" name="change_password">Save</button>
+            <button type="button" id="cancel-change-password">Cancel</button>
+        </form>
+    </div>
+    <script src="/static/js/myscript_profile.js"></script>
+    
+</body>
+</html>
