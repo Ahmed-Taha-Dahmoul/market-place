@@ -36,12 +36,6 @@ def add_product(request):
 
 
 
-def become_seller(request):
-    
-    return render(request, 'become_seller.html')
-
-
-
 
 
 @login_required
