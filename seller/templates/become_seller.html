@@ -2,7 +2,83 @@
 <html>
 <head>
   <title>Become a Seller</title>
-  <!-- Include any necessary CSS -->
+  <style>
+    /* CSS Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="file"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="file"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      text-align: center;
+      text-decoration: none;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+  <script>
+    // JavaScript to show file preview
+    function showFilePreview(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          var preview = document.getElementById("file-preview");
+          preview.innerHTML = '<img src="' + e.target.result + '" alt="File Preview" style="max-width: 100%; max-height: 200px;">';
+        };
+
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
 </head>
 <body>
   <h1>Become a Seller</h1>
@@ -11,21 +87,22 @@
     {% csrf_token %}
     <div class="form-group">
       <label for="official-name">Official Name:</label>
-      <input type="text" name="official_name" id="official-name" class="form-control" required>
+      <input type="text" name="official_name" id="official-name" required>
     </div>
     <div class="form-group">
       <label for="second-name">Second Name:</label>
-      <input type="text" name="second_name" id="second-name" class="form-control" required>
+      <input type="text" name="second_name" id="second-name" required>
     </div>
     <div class="form-group">
       <label for="documents">Upload Official Documents:</label>
-      <input type="file" name="documents" id="documents" class="form-control-file" required>
+      <input type="file" name="documents" id="documents" onchange="showFilePreview(this);" required>
     </div>
+    <div class="form-group" id="file-preview"></div>
     <div class="form-group">
       <label for="description">Why do you want to sell in our marketplace?</label>
-      <textarea name="description" id="description" class="form-control" required></textarea>
+      <textarea name="description" id="description" required></textarea>
     </div>
-    <button type="submit" class="btn btn-primary">Submit Application</button>
+    <button type="submit" class="btn">Submit Application</button>
   </form>
 </body>
 </html>
