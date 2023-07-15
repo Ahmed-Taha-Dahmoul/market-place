@@ -1,23 +1,16 @@
 from django.shortcuts import render, redirect
 from coinbase_commerce.client import Client
 from seller.models import Product, Picture
-
-
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from coinbase_commerce.webhook import Webhook
 from coinbase_commerce.error import WebhookInvalidPayload, SignatureVerificationError
 from .models import Order
 from django.contrib.auth.models import User
-
+from decimal import Decimal
+from django.utils import timezone
 
 client = Client(api_key='b39fe826-e6a0-4268-8d0c-6367a7885042')
-
-
-
-
-
-from decimal import Decimal
 
 def buy_product(request, product_id):
     # Get the product details and perform the buy action
@@ -41,12 +34,6 @@ def buy_product(request, product_id):
 
     # Redirect the user to the Coinbase Commerce checkout URL
     return redirect(charge['hosted_url'])
-
-
-
-
-
-
 
 @csrf_exempt
 def coinbase_webhook(request):
@@ -72,9 +59,21 @@ def coinbase_webhook(request):
         product = Product.objects.get(pk=product_id)
         customer = User.objects.get(username=event.data['metadata']['customer_username'])
         total_amount = float(event.data['pricing']['local']['amount'])
-        order = Order.objects.create(customer=customer, product=product, total_amount=total_amount)
+        order = Order.objects.create(customer=customer, product=product, total_amount=total_amount, order_date=timezone.now(), status='created')
         
         # Perform any other actions you need for the order
         
     # Return a success response to Coinbase
     return HttpResponse(status=200)
+
+def order_view(request, charge_id):
+    # Retrieve the order details from the charge ID
+    try:
+        order = Order.objects.get(charge_id=charge_id)
+        context = {
+            'order': order,
+            'seller_info': order.seller_info  # Include seller's information in the context
+        }
+        return render(request, 'order.html', context)
+    except Order.DoesNotExist:
+        return HttpResponse("Order not found")

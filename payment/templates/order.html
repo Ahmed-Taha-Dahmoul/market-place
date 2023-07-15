@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Details</title>
+    <style>
+        /* CSS styles for the progress steps */
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .progress-step {
+            flex: 1;
+            text-align: center;
+        }
+        .progress-step.active {
+            font-weight: bold;
+        }
+        .progress-step.finished {
+            color: green;
+        }
+        .progress-route {
+            flex: 1;
+            border-top: 2px dashed lightgray;
+        }
+        .progress-route.finished {
+            border-color: green;
+        }
+
+        /* CSS styles for the confirmation and dispute buttons */
+        .actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .actions button {
+            padding: 10px 20px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Order Details</h1>
+
+    <div class="progress-container">
+        <div class="progress-step {% if order.status == 'created' %}active{% elif order.status == 'preparing' or order.status == 'finished' %}finished{% endif %}">
+            Order Created<br>
+            {{ order.order_date }}
+        </div>
+        <div class="progress-route {% if order.status == 'preparing' or order.status == 'finished' %}finished{% endif %}"></div>
+        <div class="progress-step {% if order.status == 'preparing' %}active{% elif order.status == 'finished' %}finished{% endif %}">
+            Order Preparing
+        </div>
+        <div class="progress-route {% if order.status == 'finished' %}finished{% endif %}"></div>
+        <div class="progress-step {% if order.status == 'finished' %}active{% endif %}">
+            Order Finished
+        </div>
+    </div>
+
+    <h2>Order Information</h2>
+    <p><strong>Product:</strong> {{ order.product.product_name }}</p>
+    <p><strong>Seller:</strong> {{ order.seller_info.seller_name }}</p>
+
+    <div class="actions">
+        {% if order.status == 'finished' %}
+            <button>Confirm</button>
+            <button>Dispute</button>
+        {% endif %}
+    </div>
+</body>
+</html>
