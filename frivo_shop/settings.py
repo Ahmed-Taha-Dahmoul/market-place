@@ -29,6 +29,8 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -140,3 +142,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+
+
+PAYPAL_CLIENT_ID = 'AQ7EgIrAzcpmnhG2wvViA9o6uFn4hhsY5QihpAKwKQVfoyEUoe-HXjZ02vmJh6CzKtp25JE65d-kkqKX'
+PAYPAL_CLIENT_SECRET = 'EJ3g_JW3J_-qZv-YWM2662xaBz-Kf_iSEh3ZqMprmHrFD0x7ZbeqdHq4mnu1R8XAfAU-o9DEkSoKWMeQ'
+PAYPAL_MODE = 'sandbox'

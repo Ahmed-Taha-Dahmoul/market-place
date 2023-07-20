@@ -1,79 +1,85 @@
-from django.shortcuts import render, redirect
-from coinbase_commerce.client import Client
-from seller.models import Product, Picture
+from django.shortcuts import render, get_object_or_404
+from django.conf import settings
+from .models import Product, Order , Invoice
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-from coinbase_commerce.webhook import Webhook
-from coinbase_commerce.error import WebhookInvalidPayload, SignatureVerificationError
-from .models import Order
-from django.contrib.auth.models import User
-from decimal import Decimal
-from django.utils import timezone
+from django.http import JsonResponse
+import paypalrestsdk
+from django.urls import reverse
 
-client = Client(api_key='b39fe826-e6a0-4268-8d0c-6367a7885042')
 
-def buy_product(request, product_id):
-    # Get the product details and perform the buy action
-    product = Product.objects.get(pk=product_id)
 
-    if product.product_price == 0:
-        local_price = {'amount': str(Decimal('0.01')), 'currency': 'USD'}
-    else:
-        local_price = {'amount': str(Decimal(product.product_price)), 'currency': 'USD'}
+# Your other views...
 
-    # Create a charge
-    charge = client.charge.create(
-        name=product.product_name,
-        description=product.product_description,
-        local_price=local_price,
-        pricing_type='fixed_price',
-        metadata={'product_id': product_id},
-    )
+def order_success(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+    return render(request, 'order.html', {'order': order})
 
-    # Perform any necessary actions (e.g., update database, send email notifications, etc.)
 
-    # Redirect the user to the Coinbase Commerce checkout URL
-    return redirect(charge['hosted_url'])
+def checkout(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+
+    context = {
+        'product': product,
+        'paypal_client_id': settings.PAYPAL_CLIENT_ID
+    }
+    return render(request, 'checkout.html', context)
 
 @csrf_exempt
-def coinbase_webhook(request):
-    # Verify the authenticity of the webhook request
-    try:
-        payload = request.body.decode('utf-8')
-        signature = request.headers.get('X-CC-Webhook-Signature')
-        Webhook.verify_signature(payload, signature, 'your_webhook_secret')
-    except (WebhookInvalidPayload, SignatureVerificationError):
-        # Handle verification failure (e.g., log the error, return an error response)
-        return HttpResponse(status=400)
+def create_paypal_order(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
 
-    # Process the webhook event
-    event = Webhook.construct_event(payload, signature)
-    if event.type == 'charge:confirmed':
-        # Payment is confirmed, update the purchase status in your system
-        charge_id = event.data['id']
-        # Retrieve the corresponding purchase from your database using the charge ID
-        # Update the purchase status to 'completed' or perform any other necessary actions
-        
-        # Create an order for the confirmed payment
-        product_id = event.data['metadata']['product_id']
-        product = Product.objects.get(pk=product_id)
-        customer = User.objects.get(username=event.data['metadata']['customer_username'])
-        total_amount = float(event.data['pricing']['local']['amount'])
-        order = Order.objects.create(customer=customer, product=product, total_amount=total_amount, order_date=timezone.now(), status='created')
-        
-        # Perform any other actions you need for the order
-        
-    # Return a success response to Coinbase
-    return HttpResponse(status=200)
+    paypal_order = paypalrestsdk.Order({
+        "intent": "sale",
+        "payer": {
+            "payment_method": "paypal"
+        },
+        "redirect_urls": {
+            "return_url": request.build_absolute_uri(reverse('payment:order_success', args=[product.id])),
+            "cancel_url": "http://127.0.0.1:8000/order/cancel/"
+        },
+        "transactions": [
+            {
+                "amount": {
+                    "total": str(product.product_price),
+                    "currency": "USD"
+                },
+                "description": product.product_name
+            }
+        ]
+    })
 
-def order_view(request, charge_id):
-    # Retrieve the order details from the charge ID
-    try:
-        order = Order.objects.get(charge_id=charge_id)
-        context = {
-            'order': order,
-            'seller_info': order.seller_info  # Include seller's information in the context
-        }
-        return render(request, 'order.html', context)
-    except Order.DoesNotExist:
-        return HttpResponse("Order not found")
+    if paypal_order.create():
+        payment_id = paypal_order.id  # Get the dynamically generated payment ID
+        return JsonResponse({"order_id": payment_id})
+    else:
+        return JsonResponse({"error": paypal_order.error.message})
+
+
+
+@csrf_exempt
+def capture_paypal_order(request, order_id):
+    paypal_payment = paypalrestsdk.Payment.find(order_id)
+
+    if paypal_payment.execute({"payer_id": paypal_payment.payer.payer_info.payer_id}):
+        # Payment captured successfully
+
+        # Create a new Order instance for the successful payment
+        try:
+            product_id = paypal_payment.custom_id  # Get the product ID from the PayPal payment
+            product = get_object_or_404(Product, pk=product_id)
+            order = Order.objects.create(
+                customer=request.user,  # Set the customer as the current user (assuming authentication is used)
+                product=product,
+                total_amount=float(paypal_payment.transactions[0].amount.total),
+                payment_id=order_id,
+                payment_status='good',
+                status='created'
+            )
+            return JsonResponse({"message": "Payment captured successfully and order created.", "order_id": order.id})
+        except Product.DoesNotExist:
+            return JsonResponse({"error": "Product not found."})
+    else:
+        return JsonResponse({"error": paypal_payment.error.message})
+
+
+

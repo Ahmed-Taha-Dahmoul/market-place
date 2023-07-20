@@ -1,7 +1,10 @@
 from django.urls import path
-from .views import coinbase_webhook
+from . import views
+
+app_name = 'payment'
 
 urlpatterns = [
-    # Other URL patterns
-    path('coinbase/webhook/', coinbase_webhook, name='coinbase_webhook'),
+    path('checkout/<int:product_id>/', views.checkout, name='checkout'),
+    path('order_success/<int:order_id>/', views.order_success, name='order_success'),
+    
 ]
