@@ -103,18 +103,34 @@
         },
 
         // Finalize the transaction
-        onApprove: function (data, actions) {
-            return actions.order.capture().then(function (details) {
-                // Show the success message
-                document.getElementById('paypal-button-container').style.display = 'none';
-                document.getElementById('success-message').style.display = 'block';
+onApprove: function (data, actions) {
+    return actions.order.capture().then(function (details) {
+        // Show the success message
+        document.getElementById('paypal-button-container').style.display = 'none';
+        document.getElementById('success-message').style.display = 'block';
 
-                // Redirect to the order_success view after 3 seconds
-                setTimeout(function () {
-                    window.location.href = "{% url 'payment:order_success' product.id %}";
-                }, 3000);
-            });
-        }
+        // Send the payment details to your server for processing
+        // Replace '/payment/capture_order/' with the correct URL pattern for your view
+        fetch(`/payment/capture_order/${data.orderID}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}', // Make sure to include the CSRF token
+            },
+            body: JSON.stringify(details),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Redirect to the order_success view after 3 seconds
+            setTimeout(function () {
+                window.location.href = `/payment/order_success/${data.order_id}/`;
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error capturing payment:', error);
+        });
+    });
+}
     }).render('#paypal-button-container').then(function () {
         // PayPal button is ready, hide the loading spinner
         hideLoadingSpinner();

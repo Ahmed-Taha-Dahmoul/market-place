@@ -7,7 +7,11 @@ import paypalrestsdk
 from django.urls import reverse
 
 
-
+paypalrestsdk.configure({
+    "mode": "sandbox",  # Change to "live" for production
+    "client_id": settings.PAYPAL_CLIENT_ID,
+    "client_secret": settings.PAYPAL_CLIENT_SECRET,
+})
 # Your other views...
 
 def order_success(request, order_id):
@@ -67,6 +71,8 @@ def capture_paypal_order(request, order_id):
         try:
             product_id = paypal_payment.custom_id  # Get the product ID from the PayPal payment
             product = get_object_or_404(Product, pk=product_id)
+            print("Product ID from PayPal payment:", product_id)
+            print("Product details:", product)
             order = Order.objects.create(
                 customer=request.user,  # Set the customer as the current user (assuming authentication is used)
                 product=product,
