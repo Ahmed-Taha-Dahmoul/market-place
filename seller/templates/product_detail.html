@@ -77,7 +77,7 @@
       {% csrf_token %}
       <button type="submit" class="buy-button">Buy</button>
     </form>
-    
+    <a href="{% url 'conversation:conversation' product.id %}" class="contact-button">Contact Seller</a>
   </div>
 </body>
 </html>
