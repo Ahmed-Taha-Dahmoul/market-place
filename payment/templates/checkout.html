@@ -32,46 +32,54 @@
 
                     <!-- Include the PayPal JavaScript SDK -->
                     <script src="https://www.paypal.com/sdk/js?client-id=AQ7EgIrAzcpmnhG2wvViA9o6uFn4hhsY5QihpAKwKQVfoyEUoe-HXjZ02vmJh6CzKtp25JE65d-kkqKX&currency=USD"></script>
-                    <!-- Previous HTML content -->
 
-
-
-<!-- New JavaScript code -->
-<!-- Previous HTML content -->
-
-
-
-<!-- New JavaScript code -->
-<script>
-    const paypalButtonContainer = document.getElementById('paypal-button-container');
-    const productId = paypalButtonContainer.dataset.productId;
-    // Render the PayPal button into #paypal-button-container
-    paypal.Buttons({
-        // Set up the transaction
-        createOrder: function (data, actions) {
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: '{{ product.product_price }}'
-                    }
-                }]
-            });
-        },
-
-        // Finalize the transaction
-        onApprove: function (data, actions) {
-            return actions.order.capture().then(function (details) {
-                // Show a success message to the buyer
-                alert('Transaction completed by ' + details.payer.name.given_name + '!');
-
-                // Redirect to the order_success page after successful payment
-                var orderId = data.orderID; // Get the order ID from PayPal
-                var redirectUrl = '/payment/process_payment/' + productId + '/' + orderId + '/?payment_status=success'; // Construct the redirect URL
-                window.location.href = redirectUrl;
-            });
-        }
-    }).render('#paypal-button-container');
-</script>
+                    <!-- New JavaScript code -->
+                    <script>
+                        const paypalButtonContainer = document.getElementById('paypal-button-container');
+                        const loadingSpinner = document.getElementById('loading-spinner');
+                        const successMessage = document.getElementById('success-message');
+                        const failureMessage = document.getElementById('failure-message');
+                        const productId = paypalButtonContainer.dataset.productId;
+                    
+                        // Render the PayPal button into #paypal-button-container
+                        paypal.Buttons({
+                            // Set up the transaction
+                            createOrder: function (data, actions) {
+                                return actions.order.create({
+                                    purchase_units: [{
+                                        amount: {
+                                            value: '{{ product.product_price }}'
+                                        }
+                                    }]
+                                });
+                            },
+                    
+                            // Finalize the transaction
+                            onApprove: function (data, actions) {
+                                // Show the loading spinner while the PayPal button is loading
+                                paypalButtonContainer.style.display = 'none';
+                                loadingSpinner.style.display = 'block';
+                    
+                                return actions.order.capture().then(function (details) {
+                                    // Hide the loading spinner
+                                    loadingSpinner.style.display = 'none';
+                                    // Show the success message
+                                    successMessage.style.display = 'block';
+                    
+                                    // Redirect to the order_success page after 4 seconds
+                                    setTimeout(() => {
+                                        var orderId = data.orderID; // Get the order ID from PayPal
+                                        var redirectUrl = '/payment/process_payment/' + productId + '/' + orderId + '/?payment_status=success'; // Construct the redirect URL
+                                        window.location.href = redirectUrl;
+                                    }, 4000);
+                                }).catch(function (error) {
+                                    // If payment fails, show the failure message
+                                    loadingSpinner.style.display = 'none';
+                                    failureMessage.style.display = 'block';
+                                });
+                            }
+                        }).render('#paypal-button-container');
+                    </script>
 
 <!-- Rest of the HTML content -->
 

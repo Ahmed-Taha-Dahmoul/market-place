@@ -43,12 +43,23 @@ from seller.models import Product
 
 # ... (previous code)
 
-def process_payment(request, product_id , order_id):
+from django.http import HttpResponseServerError
+
+def process_payment(request, product_id, order_id):
     # Get the payment status from the query parameters
     payment_status = request.GET.get('payment_status')
 
     # Check if the payment is successful (you might need to implement additional checks based on PayPal's response)
     if payment_status == 'success':
+        # Check if an order with the given order_id already exists
+        existing_order = Order.objects.filter(payment_id=order_id).first()
+        if existing_order:
+            # If an order with this order_id already exists, render the success page and return
+            context = {
+                'order': existing_order
+            }
+            return render(request, 'payment_success.html', context)
+        
         # Get the product associated with the PayPal order (you might need additional checks)
         product = get_object_or_404(Product, pk=product_id)
 
@@ -67,17 +78,14 @@ def process_payment(request, product_id , order_id):
 
         # Save the order instance
         order.save()
+        context = {
+            'order': order
+        }
 
         # Redirect to a success page or display a success message
-        return render(request, 'payment_success.html', {'order': order})
+        return render(request, 'payment_success.html', context)
     else:
         # Handle unsuccessful payments (optional: you can redirect to a cancel page or display an error message)
         return render(request, 'order_cancel.html')
 
 
-    
-
-# ... (previous code)
-
-
-# ... (previous code)
