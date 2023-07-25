@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'home',
     'seller',
     'payment',
+    'conversation',
 ]
 
 MIDDLEWARE = [
