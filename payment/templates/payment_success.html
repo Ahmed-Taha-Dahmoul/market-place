@@ -59,7 +59,7 @@
 
     <h2>Order Information</h2>
     <p><strong>Product:</strong> {{ order.product.product_name }}</p>
-    <p><strong>Seller:</strong> {{ seller_info.first_name }}</p>
+    <p><strong>Seller:</strong> {{ order.product.seller_info.second_name }}</p>
 
     <div class="actions">
         {% if order.status == 'finished' %}

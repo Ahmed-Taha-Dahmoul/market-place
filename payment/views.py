@@ -62,7 +62,6 @@ def process_payment(request, product_id, order_id):
         
         # Get the product associated with the PayPal order (you might need additional checks)
         product = get_object_or_404(Product, pk=product_id)
-
         # Create a new Order instance for the successful payment
         order = Order.objects.create(
             customer=request.user,
@@ -79,7 +78,8 @@ def process_payment(request, product_id, order_id):
         # Save the order instance
         order.save()
         context = {
-            'order': order
+            'order': order,
+            'product':product
         }
 
         # Redirect to a success page or display a success message
