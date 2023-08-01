@@ -89,13 +89,3 @@ def process_payment(request, product_id, order_id):
     else:
         # Handle unsuccessful payments (optional: you can redirect to a cancel page or display an error message)
         return render(request, 'order_cancel.html')
-
-
-<<<<<<< HEAD
-ggfd
-=======
-
-
-zhemem
-
->>>>>>> dc07d92bcce7a4fac05fabb6275765e046d5bbcf
