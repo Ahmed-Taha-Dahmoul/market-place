@@ -77,13 +77,15 @@ def process_payment(request, product_id, order_id):
 
         # Save the order instance
         order.save()
-        context = {
-            'order': order,
-            'product':product
-        }
+        if request.user == order.customer or request.user == order.product.seller_info:
+            context = {
+                'order': order
+            }
+            return render(request, 'payment_success.html', context)
+        else:
+        # If the current user is neither the customer nor the seller_info, show a forbidden page
+            return HttpResponseForbidden("You do not have permission to view this order.")
 
-        # Redirect to a success page or display a success message
-        return render(request, 'payment_success.html', context)
     else:
         # Handle unsuccessful payments (optional: you can redirect to a cancel page or display an error message)
         return render(request, 'order_cancel.html')
